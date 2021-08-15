@@ -1,6 +1,7 @@
 package dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 /**
  *
@@ -20,8 +21,9 @@ public class Order {
     public BigDecimal labCost;
     public BigDecimal tax;
     public BigDecimal total;
+    public LocalDate date;
     
-    public Order(int orderNum, String custName, String state, BigDecimal taxRate, String productType, BigDecimal area, BigDecimal costPer, BigDecimal laborPer, BigDecimal matCost, BigDecimal laborCost, BigDecimal tax, BigDecimal total){
+    public Order(String date, int orderNum, String custName, String state, BigDecimal taxRate, String productType, BigDecimal area, BigDecimal costPer, BigDecimal laborPer, BigDecimal matCost, BigDecimal laborCost, BigDecimal tax, BigDecimal total){
         
         order = orderNum;
         customer = custName;
@@ -35,6 +37,7 @@ public class Order {
         labCost = laborCost;
         this.total = total;
         this.tax=tax;
+        this.date = LocalDate.parse(date);
     }
     
 }

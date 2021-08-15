@@ -12,6 +12,7 @@ import dto.Tax;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -28,19 +29,20 @@ public class FloorServImpl implements FloorServ {
     }
     
     @Override
-    public List<String> fetchAllOrders() {
+    public List<String> fetchAllOrders(LocalDate date) {
         List<String> allOrders = new ArrayList<String>();
         List<Order> orderOrders = dao.allOrders();
-        System.out.println("It didn't work.");
         for(Order order : orderOrders){
-            allOrders.add("Order " + order.order + ". " + order.product + "s to "
-                    + order.state +" for " + order.customer +". It will cost " + order.total);
+            if(order.date.isEqual(date)){
+                allOrders.add("Order " + order.order + ". " + order.product + "s to "
+                        + order.state +" for " + order.customer +". It will cost " + order.total);
+            }
         }
         return allOrders;
     }
 
     @Override
-    public Order processOrder(String custName, String state, String productType, String sArea){
+    public Order processOrder(String custName, String state, String productType, String sArea, String date){
         // Calculate a LOT
         
         BigDecimal area = new BigDecimal(sArea).setScale(2, RoundingMode.HALF_UP);
@@ -62,9 +64,10 @@ public class FloorServImpl implements FloorServ {
         BigDecimal fullTax = matCost.add(laborCost);
         fullTax.multiply(taxRate.divide(new BigDecimal("100").setScale(2, RoundingMode.HALF_UP)));
         BigDecimal fullCost = matCost.add(laborCost).add(fullTax);
+        fullCost=fullCost.setScale(2, RoundingMode.HALF_UP);
         // Total here Mat Cost + Lab Cost + Tax
-        
-        Order newOrder = new Order(0, custName, state, taxRate, productType, area, costPer, laborPer, matCost, laborCost, fullTax, fullCost);
+        System.out.println(date);
+        Order newOrder = new Order(date, 0, custName, state, taxRate, productType, area, costPer, laborPer, matCost, laborCost, fullTax, fullCost);
         return newOrder;
     }
 
@@ -169,6 +172,11 @@ public class FloorServImpl implements FloorServ {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void endStep() {
+        dao.exportAll();
     }
 
     

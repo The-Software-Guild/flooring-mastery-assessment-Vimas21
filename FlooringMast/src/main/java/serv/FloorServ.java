@@ -2,6 +2,7 @@ package serv;
 
 import dto.Order;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -14,7 +15,7 @@ public interface FloorServ {
     // Fetch and return an order
     
     // Fetch and return ALL orders.
-    public List<String> fetchAllOrders();
+    public List<String> fetchAllOrders(LocalDate date);
     
     public String fetchOneOrder(int orderNum);
     
@@ -28,7 +29,7 @@ public interface FloorServ {
     
     public void addOrder(Order order);
     
-    public Order processOrder(String custName, String state, String productType, String area);
+    public Order processOrder(String custName, String state, String productType, String area, String Date);
     
     public boolean editName(int orderNum, String newVal); 
     
@@ -39,6 +40,6 @@ public interface FloorServ {
     public boolean editArea(int orderNum, String newVal);
     // Edit an order.
     
-    
+    public void endStep();
     
 }

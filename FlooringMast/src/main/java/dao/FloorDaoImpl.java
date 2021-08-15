@@ -12,6 +12,8 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class FloorDaoImpl implements FloorDao {
@@ -28,9 +30,12 @@ public class FloorDaoImpl implements FloorDao {
         Scanner sc;
         for(File file : fileList){
             sc = new Scanner(new BufferedReader(new FileReader(file)));
+            String currentDate = file.getName();
+            currentDate = currentDate.substring(11,15) +"-" + currentDate.substring(7,9)+ "-" + currentDate.substring(9,11);
             sc.nextLine();
             while(sc.hasNextLine()){
-                orderBreakdown(sc.nextLine());
+                orderBreakdown(sc.nextLine(), currentDate);
+                maxOrder++;
             }
         }
         sc = new Scanner(new BufferedReader(new FileReader("Data/Taxes.txt")));
@@ -43,6 +48,7 @@ public class FloorDaoImpl implements FloorDao {
         while(sc.hasNextLine()){
             productBreakdown(sc.nextLine());
         }
+        
         
     }
 
@@ -71,9 +77,9 @@ public class FloorDaoImpl implements FloorDao {
     }
 
     @Override
-    public void orderBreakdown(String line) {
+    public void orderBreakdown(String line, String currentDate) {
         List<String> brokenDown = Arrays.asList(line.split(","));
-        orders.put(Integer.valueOf(brokenDown.get(0)), new Order(Integer.valueOf(brokenDown.get(0)), brokenDown.get(1), 
+        orders.put(Integer.valueOf(brokenDown.get(0)), new Order(currentDate, Integer.valueOf(brokenDown.get(0)), brokenDown.get(1), 
                 brokenDown.get(2), new BigDecimal(brokenDown.get(3)).setScale(2, RoundingMode.HALF_UP), brokenDown.get(4), 
                 new BigDecimal(brokenDown.get(5)).setScale(2, RoundingMode.HALF_UP), 
                 new BigDecimal(brokenDown.get(6)).setScale(2, RoundingMode.HALF_UP), 
@@ -109,5 +115,42 @@ public class FloorDaoImpl implements FloorDao {
     public boolean isValid(String state, String product) {
         return taxes.containsKey(state) && products.containsKey(product);
     }
+
+    @Override
+    public void exportAll(){
+        PrintWriter out;
+        ArrayList<Order> orderList = new ArrayList<Order>(orders.values());
+        ArrayList<String> dates = new ArrayList<String>();
+        for(Order o : orderList){
+            try {
+                if(!dates.contains(o.date.toString())){
+                    out = new PrintWriter(new FileWriter("Orders_" + dateToExport(o.date.toString() ) + ".txt"));
+                    dates.add(o.date.toString());
+                }
+                else{
+                    out = new PrintWriter(new FileWriter("Orders_" + dateToExport(o.date.toString() ) + ".txt", true));
+                }
+                out.append(convertToLine(o));
+                out.flush();
+                out.close();
+            } catch (IOException ex) {
+                Logger.getLogger(FloorDaoImpl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }
+
+    }
     
+    public String dateToExport(String date){
+        return date.substring(5,7) + date.substring(8) + date.substring(0,4);
+    }
+    
+    public String convertToLine(Order order){
+        String answer = String.valueOf(order.order) + "," + order.customer + "," + order.state + "," +
+                String.valueOf(order.taxRate) + "," + order.product + "," + String.valueOf(order.area) + "," +
+                String.valueOf(order.costPerSquare) + "," + String.valueOf(order.labCost) + "," +
+                String.valueOf(order.matCost) + "," + String.valueOf(order.labCost) + "," + 
+                String.valueOf(order.tax) + "," + String.valueOf(order.total) + "\n";
+        return answer;
+    }
 }

@@ -23,7 +23,7 @@ public interface FloorDao {
     public void load() throws FileNotFoundException;
     
     // Break Down Order String
-    public void orderBreakdown(String line);
+    public void orderBreakdown(String line, String currentDate);
     
     // Break Down Tax String
     public void taxBreakdown(String line);
@@ -45,6 +45,8 @@ public interface FloorDao {
     public boolean isValid(String state, String product);
     
     public List<Order> allOrders();
+    
+    public void exportAll();
     
     // Save the info to files.
     

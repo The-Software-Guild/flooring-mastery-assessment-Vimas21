@@ -7,6 +7,7 @@ package core;
 
 import dao.FloorDao;
 import dto.Order;
+import java.time.LocalDate;
 import serv.FloorServ;
 import user.io.FloorIo;
 
@@ -30,15 +31,27 @@ public class Controller {
             io.displayOptions();
             input = io.readInt("Which would you like to select?");
             if(input == 1){
-                io.displayAll(serv.fetchAllOrders());
+                String date = io.readIn("What date are you looking for? (YYYY-MM-DD)");
+                LocalDate lDate = LocalDate.parse(date);
+                io.displayAll(serv.fetchAllOrders(lDate));
             }
             if(input == 2){
                 String cust = io.readIn("What is the customers name?");
                 String state =  io.readIn("What state?");
                 String product = io.readIn("Product type?");
                 String area = io.readIn("Area?");
-                Order newOrder = serv.processOrder(cust, state, product, area);
-                io.print("Would you like to add the following order:");
+                boolean wrong = false;
+                String date;
+                do{
+                    wrong = false;
+                    date = io.readIn("Date? (YYYY-MM-DD");
+                    if(LocalDate.parse(date).isBefore(LocalDate.now())){
+                        wrong=true;
+                        io.print("This date has already passed. Try again.");
+                    }
+                }while(wrong);
+                Order newOrder = serv.processOrder(cust, state, product, area, date);
+                io.print("Would you like to add the following order (type yes):");
                 String strInput = io.readIn(serv.fetchOneOrder(newOrder));
                 if(strInput.equalsIgnoreCase("yes")){
                     serv.addOrder(newOrder);
@@ -89,6 +102,9 @@ public class Controller {
                 else{
                     io.print("Order not found.");
                 }
+            }
+            if(input == 5){
+                serv.endStep();
             }
             if(input == 6){
                 return;
